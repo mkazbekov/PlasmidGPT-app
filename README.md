@@ -10,6 +10,7 @@ We introduce PlasmidGPT, a generative language model pretrained on 153k engineer
 - [Sequence generation](#Sequence-generation)
 - [Model embeddings](#Model-embeddings)
 - [Sequence annotation](#Sequence-annotation)
+- [Reproducibility](#Reproducibility)
 
 ## Installation
 Python package dependencies:
@@ -158,6 +159,27 @@ The top predictions will be stored in the file ```lab_predictions.txt```, where 
 We have provided the jupyter notebook [PlasmidGPT_predict.ipynb](https://github.com/lingxusb/PlasmidGPT/blob/main/notebooks/PlasmidGPT_predict.ipynb) for the prediction of lab of origin.
 
 The [Colab Notebook](https://colab.research.google.com/drive/1vo27RBnScf_cOISBdd13YN_hr5-ZVNHx?usp=sharing) can be easily used in the browser to predict the lab of origin, species, and vector type for the input sequence. The notebook will automatically download all related models and make predictions based on the user's input plasmid sequence. Please use the drop-down list to select the feature to predict, and the top 10 predictions will be displayed.
+
+## Reproducibility
+
+We provide Jupyter notebooks to reproduce the main analyses in our paper. The notebooks are available in the `reproducibility` folder.
+
+### Data download
+All required data files can be downloaded from Hugging Face:
+```bash
+wget https://huggingface.co/lingxusb/PlasmidGPT/resolve/main/reproducibility.zip
+unzip reproducibility.zip
+```
+
+### Notebooks
+
+| Notebook | Description |
+| -------- | ----------- |
+| `0_embedding_calculation.ipynb` | Calculate sequence embeddings using PlasmidGPT |
+| `1_embedding_visualization.ipynb` | Visualize embeddings with t-SNE, analyze lab-specific patterns and plasmid diversity |
+| `2_prediction_benchmarking.ipynb` | Benchmark lab prediction using PlasmidGPT embeddings with cluster-based cross-validation |
+| `3_CNN_benchmarking.ipynb` | Benchmark lab prediction using CNN baseline with one-hot encoded sequences |
+| `4_generation_analysis.ipynb` | Compare part organization (synteny, co-occurrence) between real and generated plasmids |
 
 
 ## Reference
