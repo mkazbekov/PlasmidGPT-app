@@ -180,6 +180,7 @@ unzip reproducibility.zip
 | `2_prediction_benchmarking.ipynb` | Benchmark lab prediction using PlasmidGPT embeddings with cluster-based cross-validation |
 | `3_CNN_benchmarking.ipynb` | Benchmark lab prediction using CNN baseline with one-hot encoded sequences |
 | `4_generation_analysis.ipynb` | Compare part organization (synteny, co-occurrence) between real and generated plasmids |
+| `5_finetune_analysis.ipynb` | Generates visualization figures for the fine-tuned plasmid generation analysis |
 
 
 ## Reference
