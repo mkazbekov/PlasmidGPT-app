@@ -184,4 +184,5 @@ unzip reproducibility.zip
 
 
 ## Reference
-- [PlasmidGPT: a generative framework for plasmid design and annotation](https://www.biorxiv.org/content/10.1101/2024.09.30.615762v1)
+- [PlasmidGPT: a generative framework for plasmid design and annotation (Preprint)](https://www.biorxiv.org/content/10.1101/2024.09.30.615762v1)
+- [PlasmidGPT: A generative framework for plasmid analysis and generation (Sci Adv 2026)](https://www.science.org/doi/10.1126/sciadv.aee6916)
