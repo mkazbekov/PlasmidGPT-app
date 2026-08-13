@@ -178,7 +178,11 @@ def load_foundation_model(
         raise FileNotFoundError(f"Tokenizer file not found: {tokenizer_path}")
 
     active_device = device or preferred_device()
-    model = torch.load(model_path, map_location=active_device)
+    # The checkpoint pickles the full GPT2LMHeadModel object (not just a
+    # state_dict), so it needs weights_only=False to unpickle under
+    # PyTorch >=2.6's stricter default. This is the project's own bundled,
+    # trusted checkpoint.
+    model = torch.load(model_path, map_location=active_device, weights_only=False)
     model.eval()
     model.to(active_device)
 
