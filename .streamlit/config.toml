@@ -1,0 +1,15 @@
+[browser]
+gatherUsageStats = false
+
+[server]
+address = "localhost"
+headless = false
+maxUploadSize = 50
+
+[theme]
+base = "light"
+primaryColor = "#075e54"
+backgroundColor = "#f7faf7"
+secondaryBackgroundColor = "#edf5f1"
+textColor = "#112622"
+font = "sans serif"

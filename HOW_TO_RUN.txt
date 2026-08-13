@@ -1,0 +1,204 @@
+PLASMIDGPT — HOW TO RUN ON THIS COMPUTER
+==========================================
+
+EASIEST METHOD — DOUBLE-CLICK TO START
+--------------------------------------
+
+Double-click this file in the PlasmidGPT folder:
+
+  Start PlasmidGPT.cmd
+
+Your browser opens automatically. Use the Generate, Predict, or Embeddings
+section and download the result when it is ready. Keep the launcher window open
+while using the app; closing it stops PlasmidGPT.
+
+The first model action can take 10–20 seconds while the pretrained model loads.
+Later actions reuse the loaded model. Your sequences remain on this computer.
+
+The command-line instructions below remain available for advanced use.
+
+Installation folder:
+  C:\Users\mirza\Apps\PlasmidGPT
+
+This installation includes:
+  - Python 3.10 in an isolated virtual environment (.venv)
+  - PlasmidGPT and all required Python packages
+  - The pretrained model and DNA tokenizer
+  - CUDA-enabled PyTorch for the NVIDIA GeForce RTX 4050 Laptop GPU
+
+
+1. OPEN PLASMIDGPT
+------------------
+
+Open PowerShell and run:
+
+  cd C:\Users\mirza\Apps\PlasmidGPT
+  .\.venv\Scripts\Activate.ps1
+
+After activation, the PowerShell prompt should begin with "(.venv)".
+
+If PowerShell blocks Activate.ps1, you can either allow scripts for only the
+current PowerShell session:
+
+  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  .\.venv\Scripts\Activate.ps1
+
+Or skip activation and replace "python" in the examples below with:
+
+  .\.venv\Scripts\python.exe
+
+
+2. GENERATE A PLASMID SEQUENCE
+------------------------------
+
+Use the program's built-in default starting sequence:
+
+  python .\scripts\generate.py --model_dir .\pretrained_model
+
+Use your own starting DNA sequence:
+
+  python .\scripts\generate.py --model_dir .\pretrained_model --start_sequence ATCGATCGATCG
+
+Generate from the first sequence in a FASTA file:
+
+  python .\scripts\generate.py --model_dir .\pretrained_model --fasta_file .\my_sequence.fasta
+
+Generate five sequences and choose an output filename:
+
+  python .\scripts\generate.py --model_dir .\pretrained_model --num_sequences 5 --output .\my_generated_sequences.fasta
+
+Useful generation options:
+  -m, --model_dir       Model directory (use .\pretrained_model)
+  -s, --start_sequence  Starting DNA sequence written on the command line
+  -f, --fasta_file      FASTA file containing the starting sequence
+  -n, --num_sequences   Number of sequences to generate (default: 1)
+  -l, --max_length      Maximum generated token length (default: 300)
+  -t, --temperature     Randomness; higher is more random (default: 1.0)
+  -o, --output          Output FASTA filename
+
+Show all options:
+
+  python .\scripts\generate.py --help
+
+If --output is omitted, results are written to:
+  C:\Users\mirza\Apps\PlasmidGPT\generated_sequence.fasta
+
+Generation is stochastic, so repeated runs can produce different sequences.
+
+
+3. FASTA FILE FORMAT
+--------------------
+
+A FASTA file is plain text. The first line starts with ">" and is a name; the
+following line or lines contain the DNA sequence. Example:
+
+  >my_plasmid
+  ATCGATCGATCGATCGATCG
+
+For embedding calculations, sequences may contain A, T, C, G, and N.
+
+
+4. CALCULATE SEQUENCE EMBEDDINGS
+--------------------------------
+
+Create embeddings for every sequence in a FASTA file:
+
+  python .\scripts\embeddings.py --model_dir .\pretrained_model --fasta_file .\my_sequences.fasta --output_file .\embeddings.txt
+
+If --output_file is omitted, the output is written to embeddings.txt.
+
+Show all options:
+
+  python .\scripts\embeddings.py --help
+
+
+5. PREDICT LAB OF ORIGIN
+------------------------
+
+Predict directly from sequences in a FASTA file:
+
+  python .\scripts\prediction.py --model_dir .\pretrained_model --input_file .\my_sequences.fasta --nn_model .\prediction_models\embedding_prediction_labs.pth --lab_list .\prediction_models\lab_list.txt --output_file .\lab_predictions.txt
+
+Predict from a previously generated embeddings file (the -e switch means the
+input is already an embeddings file):
+
+  python .\scripts\prediction.py --model_dir .\pretrained_model --input_file .\embeddings.txt -e --nn_model .\prediction_models\embedding_prediction_labs.pth --lab_list .\prediction_models\lab_list.txt --output_file .\lab_predictions.txt
+
+Return only the top five predictions by adding:
+
+  --top_n 5
+
+Show all options:
+
+  python .\scripts\prediction.py --help
+
+The prediction_models folder also contains models and label lists for species
+and vector type. The vector-type model filename contains a space, so quote it:
+
+  ".\prediction_models\embedding_prediction_Vector type.pth"
+
+
+6. GPU CHECK
+------------
+
+PlasmidGPT automatically uses CUDA when available. Confirm that Python sees the
+GPU with:
+
+  python -c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU only')"
+
+Expected output includes:
+  True
+  NVIDIA GeForce RTX 4050 Laptop GPU
+
+The first GPU run may take extra time while CUDA initializes and the model is
+loaded. The pretrained model is about 489 MB, so loading it also uses memory.
+
+
+7. FINISHING A SESSION
+----------------------
+
+To leave the virtual environment:
+
+  deactivate
+
+Generated FASTA, embedding, and prediction files are ordinary files. Put an
+explicit path after --output or --output_file if you want them saved elsewhere.
+
+
+8. TROUBLESHOOTING
+------------------
+
+"python is not recognized" or the wrong Python version is used:
+  Activate .venv first, or use .\.venv\Scripts\python.exe explicitly.
+
+"Model file not found":
+  Run commands from C:\Users\mirza\Apps\PlasmidGPT and use:
+  --model_dir .\pretrained_model
+
+CUDA out-of-memory error:
+  Close other GPU-heavy applications, generate fewer sequences, or reduce
+  --max_length. The laptop GPU has 6 GB of VRAM.
+
+Generation seems slow:
+  Confirm the GPU check above prints True. Long sequences and multiple requested
+  sequences take more time.
+
+Invalid character error:
+  Use only A, T, C, G, and N in FASTA sequences used by embeddings.py.
+
+
+9. IMPORTANT NOTES
+------------------
+
+PlasmidGPT generates computational predictions and candidate sequences. Review
+outputs with appropriate biological validation and biosafety procedures before
+using them experimentally.
+
+Source code:
+  https://github.com/lingxusb/PlasmidGPT
+
+Pretrained model:
+  https://huggingface.co/lingxusb/PlasmidGPT
+
+The repository code is MIT licensed. The pretrained model is licensed under
+CC BY-NC 4.0, which restricts commercial use.

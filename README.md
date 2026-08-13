@@ -1,6 +1,16 @@
 # PlasmidGPT: a generative framework for plasmid design and annotation
 ![github](https://github.com/user-attachments/assets/fc75bf4f-972c-4e3e-913e-499f01ab41ba)
 
+## Easiest way to use it on Windows
+
+Double-click **`Start PlasmidGPT.cmd`**. A private local interface opens in your
+browser with four work areas: Generate, Predict, Embeddings, and Help. The
+launcher uses the included `.venv`, installs the small interface dependency on
+first use if needed, and automatically uses CUDA when available.
+
+Your DNA sequences stay on your computer. Keep the launcher window open while
+you use the interface; closing it stops the local app.
+
 We introduce PlasmidGPT, a generative language model pretrained on 153k engineered plasmid sequences from Addgene (https://www.addgene.org/). PlasmidGPT generates de novo sequences that share similar characteristics with engineered plasmids but show low sequence identity to the training data. We demonstrate its ability to generate plasmids in a controlled manner based on the input sequence or specific design constraint. Moreover, our model learns informative embeddings of both engineered and natural plasmids, allowing for efficient prediction of a wide range of sequence-related attributes.
 
 ## Table of Contents

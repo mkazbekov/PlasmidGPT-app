@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Local command-line smoke-test outputs
+generated_sequence.fasta
+lab_predictions.txt
+embeddings.txt
+test_generated_sequence.fasta
+test_lab_predictions.txt
