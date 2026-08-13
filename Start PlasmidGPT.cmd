@@ -7,20 +7,42 @@ set "PLASMIDGPT_PYTHON=%~dp0.venv\Scripts\python.exe"
 
 if not exist "%PLASMIDGPT_PYTHON%" (
   echo.
-  echo  PlasmidGPT's Python environment was not found.
-  echo  Expected: %PLASMIDGPT_PYTHON%
+  echo  First-time setup: creating PlasmidGPT's local Python environment...
+  echo  This normally takes a few minutes and happens only once.
   echo.
-  echo  Reinstall the local environment, then double-click this file again.
-  echo.
-  pause
-  exit /b 1
+
+  where py >nul 2>&1
+  if not errorlevel 1 (
+    py -3.10 -m venv "%~dp0.venv" 2>nul || py -3 -m venv "%~dp0.venv"
+  ) else (
+    where python >nul 2>&1
+    if errorlevel 1 (
+      echo.
+      echo  Python was not found on this computer.
+      echo  Install Python 3.10+ from https://www.python.org/downloads/
+      echo  and make sure to check "Add python.exe to PATH" during setup,
+      echo  then double-click this file again.
+      echo.
+      pause
+      exit /b 1
+    )
+    python -m venv "%~dp0.venv"
+  )
+
+  if not exist "%PLASMIDGPT_PYTHON%" (
+    echo.
+    echo  Could not create the Python environment. See any messages above.
+    echo.
+    pause
+    exit /b 1
+  )
 )
 
 "%PLASMIDGPT_PYTHON%" -c "import streamlit" >nul 2>&1
 if errorlevel 1 (
   echo.
-  echo  First-time setup: installing the local interface...
-  echo  This normally takes one or two minutes and happens only once.
+  echo  First-time setup: installing PlasmidGPT's dependencies...
+  echo  This normally takes a few minutes and happens only once.
   echo.
   "%PLASMIDGPT_PYTHON%" -m pip --version >nul 2>&1
   if errorlevel 1 (
@@ -33,6 +55,7 @@ if errorlevel 1 (
       exit /b 1
     )
   )
+  "%PLASMIDGPT_PYTHON%" -m pip install --upgrade pip >nul
   "%PLASMIDGPT_PYTHON%" -m pip install -r "%~dp0requirements-app.txt"
   if errorlevel 1 (
     echo.
@@ -41,6 +64,21 @@ if errorlevel 1 (
     pause
     exit /b 1
   )
+)
+
+if not exist "%~dp0pretrained_model\pretrained_model.pt" (
+  echo.
+  echo  The pretrained model file is missing:
+  echo    pretrained_model\pretrained_model.pt
+  echo.
+  echo  If you downloaded this project as a ZIP file, Git LFS assets are not
+  echo  included. Clone it with Git instead so large files download correctly:
+  echo.
+  echo    git lfs install
+  echo    git clone https://github.com/mkazbekov/PlasmidGPT-app.git
+  echo.
+  pause
+  exit /b 1
 )
 
 echo.

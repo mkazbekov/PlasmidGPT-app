@@ -44,6 +44,7 @@ st.markdown(
       --lime: #d9ff73;
       --cream: #f6f4eb;
       --line: #dce8e3;
+      --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     }
     .stApp { background: linear-gradient(180deg, #f8fbf8 0%, #f3f6f1 100%); }
     [data-testid="stHeader"] { background: rgba(248,251,248,.88); }
@@ -67,15 +68,46 @@ st.markdown(
     .hero p { color: #3f5f56; font-size: 1.06rem; max-width: 720px; margin: 0; }
     .privacy { display: inline-flex; margin-top: 1rem; padding: .36rem .72rem; border-radius: 999px; background: #fff; color: #1e5b4d; font-size: .78rem; font-weight: 700; border: 1px solid #d6e8df; }
     .section-intro { color: var(--muted); margin-top: -.35rem; margin-bottom: 1.2rem; }
-    .result-card { border: 1px solid var(--line); background: white; border-radius: 18px; padding: 1rem 1.1rem; margin: .6rem 0; }
+    .result-card {
+      border: 1px solid var(--line); background: white; border-radius: 18px; padding: 1rem 1.1rem; margin: .6rem 0;
+      opacity: 1; transform: translateY(0);
+      transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+      @starting-style { opacity: 0; transform: translateY(6px); }
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="column"]:nth-of-type(2) .result-card { transition-delay: 60ms; }
+    [data-testid="stHorizontalBlock"] > [data-testid="column"]:nth-of-type(3) .result-card { transition-delay: 120ms; }
     .result-title { color: var(--ink); font-weight: 750; }
     .result-meta { color: var(--muted); font-size: .82rem; }
     .sequence-preview { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .78rem; overflow-wrap: anywhere; color: #17493d; background: #f0f7f3; border-radius: 10px; padding: .75rem; margin-top: .65rem; }
     .callout { background: #edf8f2; border-left: 4px solid #16806c; padding: .9rem 1rem; border-radius: 0 12px 12px 0; color: #315c52; }
-    .stButton > button, .stDownloadButton > button { border-radius: 999px; font-weight: 700; min-height: 2.7rem; }
+    .stButton > button, .stDownloadButton > button {
+      border-radius: 999px; font-weight: 700; min-height: 2.7rem;
+      transition: transform 130ms var(--ease-out);
+    }
+    .stButton > button:active, .stDownloadButton > button:active { transform: scale(0.97); }
     .stButton > button[kind="primary"], .stDownloadButton > button[kind="primary"] { background: var(--forest); border-color: var(--forest); }
-    [data-testid="stMetric"] { background: #fff; border: 1px solid var(--line); padding: .8rem 1rem; border-radius: 15px; }
-    [data-testid="stFileUploaderDropzone"] { background: #f8fbf9; border-color: #bfd6cc; }
+    [data-testid="stMetric"] {
+      background: #fff; border: 1px solid var(--line); padding: .8rem 1rem; border-radius: 15px;
+      opacity: 1; transition: opacity 220ms var(--ease-out);
+      @starting-style { opacity: 0; }
+    }
+    [data-testid="stFileUploaderDropzone"] {
+      background: #f8fbf9; border-color: #bfd6cc;
+      transition: border-color 150ms var(--ease-out), background-color 150ms var(--ease-out);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      [data-testid="stFileUploaderDropzone"]:hover { border-color: var(--forest); background: #eef8f2; }
+    }
+    [data-testid="stAlert"] {
+      opacity: 1;
+      transition: opacity 180ms var(--ease-out);
+      @starting-style { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .result-card, [data-testid="stMetric"], [data-testid="stAlert"] { transition-duration: 80ms; }
+      .result-card { transition-property: opacity; transform: none !important; }
+      .result-card { @starting-style { transform: none; } }
+    }
     code { color: #155a4a; }
     </style>
     """,

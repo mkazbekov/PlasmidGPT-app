@@ -1,204 +1,95 @@
-# PlasmidGPT: a generative framework for plasmid design and annotation
-![github](https://github.com/user-attachments/assets/fc75bf4f-972c-4e3e-913e-499f01ab41ba)
+# PlasmidGPT Studio
 
-> **Upstream attribution:** This repository is an interface-focused adaptation
-> of the original [lingxusb/PlasmidGPT](https://github.com/lingxusb/PlasmidGPT)
-> project. The underlying model, scientific methods, original scripts,
-> notebooks, and prediction assets come from that project. See
-> [UPSTREAM.md](UPSTREAM.md) for provenance and licensing details.
+A local, private browser app for designing and analyzing plasmid DNA with **PlasmidGPT**, a generative language model pretrained on 153k engineered plasmid sequences from [Addgene](https://www.addgene.org/). No command line, no cloud, no account — clone it, run one script, and you're generating sequences in your browser.
 
-## Easiest way to use it on Windows
+![PlasmidGPT Studio](https://github.com/user-attachments/assets/fc75bf4f-972c-4e3e-913e-499f01ab41ba)
 
-Double-click **`Start PlasmidGPT.cmd`**. A private local interface opens in your
-browser with four work areas: Generate, Predict, Embeddings, and Help. The
-launcher uses the included `.venv`, installs the small interface dependency on
-first use if needed, and automatically uses CUDA when available.
+> **Upstream attribution:** This repository is an interface-focused adaptation of the original [lingxusb/PlasmidGPT](https://github.com/lingxusb/PlasmidGPT) project. The underlying model, scientific methods, and original scripts/notebooks come from that project. See [UPSTREAM.md](UPSTREAM.md) for full provenance and licensing details.
 
-Your DNA sequences stay on your computer. Keep the launcher window open while
-you use the interface; closing it stops the local app.
+## What it does
 
-We introduce PlasmidGPT, a generative language model pretrained on 153k engineered plasmid sequences from Addgene (https://www.addgene.org/). PlasmidGPT generates de novo sequences that share similar characteristics with engineered plasmids but show low sequence identity to the training data. We demonstrate its ability to generate plasmids in a controlled manner based on the input sequence or specific design constraint. Moreover, our model learns informative embeddings of both engineered and natural plasmids, allowing for efficient prediction of a wide range of sequence-related attributes.
+PlasmidGPT Studio has four work areas, all running on your own machine:
 
-## Table of Contents
+- **Generate** — start from a short DNA seed (or upload a FASTA file) and generate candidate plasmid sequences. Download the results as FASTA, or send a sequence straight into Predict.
+- **Predict** — paste or upload a sequence and predict its most likely **lab of origin**, **host species**, or **vector type**, ranked with confidence scores.
+- **Embeddings** — convert one or more sequences into 768-value numerical embeddings for downstream analysis (clustering, similarity search, custom ML).
+- **Help** — an in-app quick guide and troubleshooting reference.
 
-- [Installation](#Installation)
-- [Trained model](#Trained-model)
-- [Sequence generation](#Sequence-generation)
-- [Model embeddings](#Model-embeddings)
-- [Sequence annotation](#Sequence-annotation)
-- [Reproducibility](#Reproducibility)
+Your sequences never leave your computer. The app uses your GPU automatically when one is available, and falls back to CPU otherwise.
 
-## Installation
-Python package dependencies:
-- torch 2.0.1
-- transformers 4.37.2
-- pandas 2.2.0
-- seaborn 0.13.2
+## Install and run
 
-We recommend using [Conda](https://docs.conda.io/en/latest/index.html) to install our packages. For convenience, we have provided a conda environment file with package versions that are compatiable with the current version of the program. The conda environment can be setup with the following comments:
+You need [Git](https://git-scm.com/downloads) with [Git LFS](https://git-lfs.com/) (the pretrained model is ~489 MB and is stored via LFS) and Python 3.10+.
 
-1. Clone this repository:
-   ```bash
-     git clone https://github.com/lingxusb/PlasmidGPT.git
-     cd PlasmidGPT
-   ```
-
-2. Create and activate the Conda environment:
-   ```bash
-   conda env create -f env.yml
-   conda activate PlasmidGPT
-   ```
-
-## Trained model
-The trained model and tokenizer is availale at [huggingface](https://huggingface.co/lingxusb/PlasmidGPT/tree/main).
-- ```pretrained_model.pt```, pretrained PlasmidGPT model, can be accessed [here](https://huggingface.co/lingxusb/PlasmidGPT/blob/main/pretrained_model.pt)
-- ```addgene_trained_dna_tokenizer.json```, trained BPE tokenizer on Addgene plasmid sequences, can be accessed [here](https://huggingface.co/lingxusb/PlasmidGPT/blob/main/addgene_trained_dna_tokenizer.json)
-
-
-## Sequence generation
-```python
-import torch
-
-# load the model
-device = 'cpu' # use 'cuda' for GPU
-
-model = torch.load(pt_file_path).to(device)
-model.eval()
-
-# start sequence
-input_ids = tokenizer.encode(start_sequence, return_tensors='pt').to(device)
-
-# model generation
-outputs = model.generate(
-    input_ids,
-    max_length=300,
-    num_return_sequences=1,
-    temperature=1.0,
-    do_sample=True,
-    generation_config=GenerationConfig.from_model_config(model.config)
-)
-
-# transform tokens back to DNA ucleotide sequence:
-generated_sequence = tokenizer.decode(outputs[0], skip_special_tokens=True)
-```
-### command line
-To generate plasmid sequence using the model, please run the following command:
-```Python
-python generate.py --model_dir ../pretrained_model
-```
-The ```../pretrained_model``` folder should contain the model file and the tokenizer.
-
-For a full list of options, please run:
-
-```
-python generate.py -h
+```bash
+git lfs install
+git clone https://github.com/mkazbekov/PlasmidGPT-app.git
+cd PlasmidGPT-app
 ```
 
-Arguments description
+Then start the app:
 
-| argument | description |
-| ------------- | ------------- |
-| ```-h```, ```--help```  | show help message and exit  |
-| ```-m```, ```--model_dir```  | path to the directory containing the pretrained model and tokenizer, __required__  |
-|  ```-s```, ```--start_sequence```| starting DNA sequence for sequence generation  |
-| ```-f```, ```--fasta_file```| FASTA file containing the starting sequence  |
-| ```-n```, ```--num_sequences``` | number of sequences to generate, default value: 1  |
-| ```-l```, ```--max_length``` | maximum length of the tokenized generated sequence, default value: 300 |
-| ```-t```, ```--temperature``` | temperature for sequence generation (controls randomness), default value: 1.0  |
-| ```-o```, ```--output``` | output file name for the generated sequences, default value: generated_sequence.fasta|
+| Platform | Command |
+| --- | --- |
+| Windows | Double-click **`Start PlasmidGPT.cmd`** |
+| macOS / Linux | `chmod +x start.sh && ./start.sh` |
 
-The model output will be stored in the ```generated_sequence.fasta``` file. The script should automatically detect whether to use CUDA (GPU) or CPU based on availability. If you encounter a CUDA-related error when running on a CPU-only machine, the script will handle this by falling back to CPU.
+The first run creates a local Python environment and installs dependencies automatically — this takes a few minutes and happens only once. Your browser then opens PlasmidGPT Studio. Keep the launcher window open while using the app; closing it stops the local server.
 
+> Downloaded a ZIP instead of cloning with Git? Git LFS files (the pretrained model) won't be included, and the app will tell you what's missing on startup. Clone with `git lfs install` first instead.
 
-### notebooks
-Please also check our jupyter notebook [PlasmidGPT_generate.ipynb](https://github.com/lingxusb/PlasmidGPT/blob/main/notebooks/PlasmidGPT_generate.ipynb).
+## Advanced usage
 
-Or, you can easily use our [Colab Notebook](https://colab.research.google.com/drive/1xWbekcTpcGMSiQE6LkRnqSTjswDkKAoc?usp=sharing) in the browser. Please make sure to connect to a GPU instance (e.g., T4 GPU). The notebook will automatically download the pretrained model and tokenizer. The plasmid sequence can be generated based on the user's specified start sequence and downloaded in the ```.fasta``` file format.
+The original command-line scripts (`generate.py`, `embeddings.py`, `prediction.py`) and the reproducibility notebooks remain fully available for scripted or batch workflows, using the virtual environment created by the launcher above. See **[HOW_TO_RUN.txt](HOW_TO_RUN.txt)** for the complete command reference, argument tables, FASTA format notes, and troubleshooting.
 
+<details>
+<summary>Reproducibility notebooks</summary>
 
-## Model embeddings
-```python
-# calculation of model embeddings
-model.config.output_hidden_states = True
+Jupyter notebooks that reproduce the analyses from the PlasmidGPT paper live in [`reproducibility/`](reproducibility). Required data can be downloaded from Hugging Face:
 
-# Inference to obtain hidden states
-with torch.no_grad():
-    outputs = model(input_ids)
-    hidden_states = outputs.hidden_states[-1].cpu().numpy()
-    hidden_states_mean = np.mean(hidden_states, axis=1).reshape(-1)    
-    embedding.append(hidden_states_mean)
-```
-### command
-To generate plasmid sequence embeddings, please run the following command:
-```Python
-python embeddings.py [-h] -m MODEL_DIR -f FASTA_FILE [-o OUTPUT_FILE]
-```
-
-Arguments description
-
-| argument | description |
-| ------------- | ------------- |
-| ```-h```, ```--help```  | show help message and exit  |
-| ```-m```, ```--model_dir```  | path to the directory containing the pretrained model and tokenizer, __required__  |
-|  ```-f```, ```--fasta_file```| FASTA file containing DNA sequences for the embedding calculation, __required__  |
-| ```-o```, ```--output_file```| output file name for saving the embeddings |
-
-The model output will be save in the ```embeddings.txt``` file.
-
-
-## Sequence annotation
-For prediction of attributes, please check our models in the ```prediction_models``` folder.
-
-### command
-To predict lab of origin based on input fasta file, please run the following command:
-```Python
-python prediction.py [-h] -m MODEL_DIR -i INPUT_FILE [-e] -nn NN_MODEL -l LAB_LIST [-o OUTPUT_FILE] [-n TOP_N]
-```
-The neural network model for lab prediction is provided in ```./prediction_models/embedding_prediction_labs.pth```. The lab labels are provided in ```./prediction_models/lab_list.txt```.
-
-Arguments description
-
-| argument | description |
-| ------------- | ------------- |
-| ```-h```, ```--help```  | show help message and exit  |
-| ```-m```, ```--model_dir```  | path to the directory containing the pretrained model and tokenizer, __required__  |
-|  ```-i```, ```--input_file```| FASTA file or embeddings file as input, __required__  |
-| ```-e```, ```--embedding_file```| indicates if the input is an embedding file |
-| ```-nn```, ```--nn_model```| path to the neural network model for lab prediction, __required__ |
-| ```-l```, ```--lab_list```| path to the file containing the lab labels, __required__ |
-| ```-o```, ```--output_file```| output file name for lab predictions |
-| ```-n```, ```--top_n```| number of top predictions to output, default value: 10 |
-
-The top predictions will be stored in the file ```lab_predictions.txt```, where each row corresponds to one input sequence.
-
-### notebooks
-We have provided the jupyter notebook [PlasmidGPT_predict.ipynb](https://github.com/lingxusb/PlasmidGPT/blob/main/notebooks/PlasmidGPT_predict.ipynb) for the prediction of lab of origin.
-
-The [Colab Notebook](https://colab.research.google.com/drive/1vo27RBnScf_cOISBdd13YN_hr5-ZVNHx?usp=sharing) can be easily used in the browser to predict the lab of origin, species, and vector type for the input sequence. The notebook will automatically download all related models and make predictions based on the user's input plasmid sequence. Please use the drop-down list to select the feature to predict, and the top 10 predictions will be displayed.
-
-## Reproducibility
-
-We provide Jupyter notebooks to reproduce the main analyses in our paper. The notebooks are available in the `reproducibility` folder.
-
-### Data download
-All required data files can be downloaded from Hugging Face:
 ```bash
 wget https://huggingface.co/lingxusb/PlasmidGPT/resolve/main/reproducibility.zip
 unzip reproducibility.zip
 ```
 
-### Notebooks
-
 | Notebook | Description |
-| -------- | ----------- |
+| --- | --- |
 | `0_embedding_calculation.ipynb` | Calculate sequence embeddings using PlasmidGPT |
 | `1_embedding_visualization.ipynb` | Visualize embeddings with t-SNE, analyze lab-specific patterns and plasmid diversity |
 | `2_prediction_benchmarking.ipynb` | Benchmark lab prediction using PlasmidGPT embeddings with cluster-based cross-validation |
-| `3_CNN_benchmarking.ipynb` | Benchmark lab prediction using CNN baseline with one-hot encoded sequences |
+| `3_CNN_benchmarking.ipynb` | Benchmark lab prediction using a CNN baseline with one-hot encoded sequences |
 | `4_generation_analysis.ipynb` | Compare part organization (synteny, co-occurrence) between real and generated plasmids |
-| `5_finetune_analysis.ipynb` | Generates visualization figures for the fine-tuned plasmid generation analysis |
+| `5_finetune_analysis.ipynb` | Visualization figures for the fine-tuned plasmid generation analysis |
 
+</details>
+
+<details>
+<summary>Trained model files</summary>
+
+The trained model and tokenizer are available on [Hugging Face](https://huggingface.co/lingxusb/PlasmidGPT/tree/main):
+
+- `pretrained_model.pt` — the pretrained PlasmidGPT model
+- `addgene_trained_dna_tokenizer.json` — the BPE tokenizer trained on Addgene plasmid sequences
+
+Both are already bundled in this repository via Git LFS, so a normal `git clone` (with `git lfs install`) is all you need.
+
+</details>
+
+## Testing
+
+```bash
+python -m unittest discover tests
+```
+
+## Important notes
+
+PlasmidGPT generates computational predictions and candidate sequences. Review outputs with appropriate biological validation and biosafety procedures before using them experimentally.
 
 ## Reference
+
 - [PlasmidGPT: a generative framework for plasmid design and annotation (Preprint)](https://www.biorxiv.org/content/10.1101/2024.09.30.615762v1)
 - [PlasmidGPT: A generative framework for plasmid analysis and generation (Sci Adv 2026)](https://www.science.org/doi/10.1126/sciadv.aee6916)
+
+## License
+
+The repository code is MIT licensed (see [LICENSE](LICENSE)). The pretrained model is distributed under **CC BY-NC 4.0**, which restricts commercial use — see [UPSTREAM.md](UPSTREAM.md) for details.
