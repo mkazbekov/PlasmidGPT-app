@@ -1,6 +1,12 @@
 # PlasmidGPT: a generative framework for plasmid design and annotation
 ![github](https://github.com/user-attachments/assets/fc75bf4f-972c-4e3e-913e-499f01ab41ba)
 
+> **Upstream attribution:** This repository is an interface-focused adaptation
+> of the original [lingxusb/PlasmidGPT](https://github.com/lingxusb/PlasmidGPT)
+> project. The underlying model, scientific methods, original scripts,
+> notebooks, and prediction assets come from that project. See
+> [UPSTREAM.md](UPSTREAM.md) for provenance and licensing details.
+
 ## Easiest way to use it on Windows
 
 Double-click **`Start PlasmidGPT.cmd`**. A private local interface opens in your
