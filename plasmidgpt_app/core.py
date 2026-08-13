@@ -201,8 +201,19 @@ def load_foundation_model(
     # state_dict), so it needs weights_only=False to unpickle under
     # PyTorch >=2.6's stricter default. This is the project's own bundled,
     # trusted checkpoint.
-    model = torch.load(model_path, map_location=active_device, weights_only=False)
-    _repair_config(model.config)
+    checkpoint_model = torch.load(model_path, map_location=active_device, weights_only=False)
+    _repair_config(checkpoint_model.config)
+    # Unpickling restores __dict__ directly and never re-runs __init__, so
+    # instance attributes that newer transformers releases only set up
+    # inside __init__/post_init (e.g. GPT2Model._attn_implementation) are
+    # missing from the resurrected object and break at inference time.
+    # Rebuild a fresh instance through the currently installed transformers'
+    # constructor and transplant just the trained weights.
+    model = type(checkpoint_model)(checkpoint_model.config)
+    try:
+        model.load_state_dict(checkpoint_model.state_dict())
+    except RuntimeError:
+        model.load_state_dict(checkpoint_model.state_dict(), strict=False)
     model.eval()
     model.to(active_device)
 
