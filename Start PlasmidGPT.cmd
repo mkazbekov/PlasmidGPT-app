@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion
 cd /d "%~dp0"
 title PlasmidGPT Studio
 
@@ -72,9 +72,24 @@ if not errorlevel 1 (
   if errorlevel 1 (
     echo.
     echo  NVIDIA GPU detected - installing the CUDA-enabled PyTorch build...
-    echo  This only needs to happen once.
+    echo  This only needs to happen once and may take a few minutes.
     echo.
-    "%PLASMIDGPT_PYTHON%" -m pip install --upgrade torch --index-url https://download.pytorch.org/whl/cu121
+    set "GPU_TORCH_OK="
+    for %%T in (cu129 cu128 cu126 cu124 cu121) do (
+      if not defined GPU_TORCH_OK (
+        echo  Trying PyTorch build %%T...
+        "%PLASMIDGPT_PYTHON%" -m pip install --force-reinstall torch --index-url https://download.pytorch.org/whl/%%T >nul 2>&1
+        "%PLASMIDGPT_PYTHON%" -c "import sys,torch; sys.exit(0 if torch.cuda.is_available() else 1)" >nul 2>&1
+        if not errorlevel 1 set "GPU_TORCH_OK=1"
+      )
+    )
+    if not defined GPU_TORCH_OK (
+      echo.
+      echo  Could not install a CUDA-enabled PyTorch build automatically.
+      echo  PlasmidGPT will continue in CPU mode this run. See
+      echo  https://pytorch.org/get-started/locally/ to install one manually.
+      echo.
+    )
   )
 )
 

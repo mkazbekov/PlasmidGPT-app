@@ -41,9 +41,24 @@ if command -v nvidia-smi >/dev/null 2>&1; then
   if ! "$PYTHON_BIN" -c "import sys, torch; sys.exit(0 if torch.cuda.is_available() else 1)" >/dev/null 2>&1; then
     echo
     echo "NVIDIA GPU detected - installing the CUDA-enabled PyTorch build..."
-    echo "This only needs to happen once."
+    echo "This only needs to happen once and may take a few minutes."
     echo
-    "$PYTHON_BIN" -m pip install --upgrade torch --index-url https://download.pytorch.org/whl/cu121
+    gpu_torch_ok=0
+    for tag in cu129 cu128 cu126 cu124 cu121; do
+      echo "Trying PyTorch build $tag..."
+      "$PYTHON_BIN" -m pip install --force-reinstall torch --index-url "https://download.pytorch.org/whl/$tag" >/dev/null 2>&1 || true
+      if "$PYTHON_BIN" -c "import sys, torch; sys.exit(0 if torch.cuda.is_available() else 1)" >/dev/null 2>&1; then
+        gpu_torch_ok=1
+        break
+      fi
+    done
+    if [ "$gpu_torch_ok" -eq 0 ]; then
+      echo
+      echo "Could not install a CUDA-enabled PyTorch build automatically."
+      echo "PlasmidGPT will continue in CPU mode this run. See"
+      echo "https://pytorch.org/get-started/locally/ to install one manually."
+      echo
+    fi
   fi
 fi
 
