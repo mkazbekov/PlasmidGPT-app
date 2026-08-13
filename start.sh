@@ -37,6 +37,16 @@ if ! "$PYTHON_BIN" -c "import streamlit" >/dev/null 2>&1; then
   "$PYTHON_BIN" -m pip install -r requirements-app.txt
 fi
 
+if command -v nvidia-smi >/dev/null 2>&1; then
+  if ! "$PYTHON_BIN" -c "import sys, torch; sys.exit(0 if torch.cuda.is_available() else 1)" >/dev/null 2>&1; then
+    echo
+    echo "NVIDIA GPU detected - installing the CUDA-enabled PyTorch build..."
+    echo "This only needs to happen once."
+    echo
+    "$PYTHON_BIN" -m pip install --upgrade torch --index-url https://download.pytorch.org/whl/cu121
+  fi
+fi
+
 if [ ! -f "pretrained_model/pretrained_model.pt" ]; then
   echo
   echo "The pretrained model file is missing: pretrained_model/pretrained_model.pt"

@@ -66,6 +66,18 @@ if errorlevel 1 (
   )
 )
 
+where nvidia-smi >nul 2>&1
+if not errorlevel 1 (
+  "%PLASMIDGPT_PYTHON%" -c "import sys,torch; sys.exit(0 if torch.cuda.is_available() else 1)" >nul 2>&1
+  if errorlevel 1 (
+    echo.
+    echo  NVIDIA GPU detected - installing the CUDA-enabled PyTorch build...
+    echo  This only needs to happen once.
+    echo.
+    "%PLASMIDGPT_PYTHON%" -m pip install --upgrade torch --index-url https://download.pytorch.org/whl/cu121
+  )
+)
+
 if not exist "%~dp0pretrained_model\pretrained_model.pt" (
   echo.
   echo  The pretrained model file is missing:

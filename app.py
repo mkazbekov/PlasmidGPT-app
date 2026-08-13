@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import threading
 from io import StringIO
 
 import numpy as np
@@ -142,6 +144,23 @@ def send_generated_to_prediction() -> None:
         st.session_state["section"] = "Predict"
 
 
+def _shutdown_server() -> None:
+    os._exit(0)
+
+
+def ask_confirm_stop() -> None:
+    st.session_state["_confirm_stop"] = True
+
+
+def cancel_stop() -> None:
+    st.session_state["_confirm_stop"] = False
+
+
+def confirm_stop() -> None:
+    st.session_state["_confirm_stop"] = False
+    st.session_state["_stop_requested"] = True
+
+
 def render_status() -> None:
     status, detail = device_summary()
     st.sidebar.markdown("### PlasmidGPT")
@@ -152,6 +171,26 @@ def render_status() -> None:
     else:
         st.sidebar.warning(f"{status}\n\n{detail}")
     st.sidebar.caption("Your sequences stay on this computer.")
+    st.sidebar.markdown("---")
+    if st.session_state.get("_stop_requested"):
+        st.sidebar.error("Stopping PlasmidGPT…")
+        st.sidebar.caption("You can close this browser tab now.")
+        threading.Timer(0.75, _shutdown_server).start()
+    elif st.session_state.get("_confirm_stop"):
+        st.sidebar.warning("Stop the local PlasmidGPT server?")
+        yes_col, no_col = st.sidebar.columns(2)
+        with yes_col:
+            st.button("Yes, stop", on_click=confirm_stop, width="stretch", key="stop_confirm_yes")
+        with no_col:
+            st.button("Cancel", on_click=cancel_stop, width="stretch", key="stop_confirm_no")
+    else:
+        st.sidebar.button(
+            "Stop app",
+            on_click=ask_confirm_stop,
+            width="stretch",
+            key="stop_app_button",
+            help="Shuts down the local PlasmidGPT server running on this computer.",
+        )
 
 
 def render_header() -> None:
