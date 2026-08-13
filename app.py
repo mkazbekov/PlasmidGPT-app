@@ -111,6 +111,24 @@ st.markdown(
       .result-card { @starting-style { transform: none; } }
     }
     code { color: #155a4a; }
+    .st-key-stop_controls {
+      position: fixed;
+      left: 1rem;
+      bottom: 1rem;
+      z-index: 1000;
+      width: 230px;
+      background: #14201d;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 16px;
+      padding: .7rem .7rem .3rem;
+      box-shadow: 0 14px 34px rgba(0,0,0,.4);
+    }
+    .st-key-stop_controls .stButton > button {
+      font-weight: 800;
+    }
+    .st-key-stop_controls .stButton > button[kind="primary"] {
+      background: #d43d2f; border-color: #d43d2f; color: #fff;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -171,23 +189,31 @@ def render_status() -> None:
     else:
         st.sidebar.warning(f"{status}\n\n{detail}")
     st.sidebar.caption("Your sequences stay on this computer.")
-    st.sidebar.markdown("---")
+
+    stop_box = st.sidebar.container(key="stop_controls")
     if st.session_state.get("_stop_requested"):
-        st.sidebar.error("Stopping PlasmidGPT…")
-        st.sidebar.caption("You can close this browser tab now.")
+        stop_box.error("⏹ Stopping PlasmidGPT…")
+        stop_box.caption("You can close this browser tab now.")
         threading.Timer(0.75, _shutdown_server).start()
     elif st.session_state.get("_confirm_stop"):
-        st.sidebar.warning("Stop the local PlasmidGPT server?")
-        yes_col, no_col = st.sidebar.columns(2)
+        stop_box.warning("Stop the local server?")
+        yes_col, no_col = stop_box.columns(2)
         with yes_col:
-            st.button("Yes, stop", on_click=confirm_stop, width="stretch", key="stop_confirm_yes")
+            st.button(
+                "Yes, stop",
+                on_click=confirm_stop,
+                width="stretch",
+                type="primary",
+                key="stop_confirm_yes",
+            )
         with no_col:
             st.button("Cancel", on_click=cancel_stop, width="stretch", key="stop_confirm_no")
     else:
-        st.sidebar.button(
-            "Stop app",
+        stop_box.button(
+            "⏹ Stop app",
             on_click=ask_confirm_stop,
             width="stretch",
+            type="primary",
             key="stop_app_button",
             help="Shuts down the local PlasmidGPT server running on this computer.",
         )

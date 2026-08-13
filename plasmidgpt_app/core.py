@@ -163,6 +163,25 @@ def fasta_bytes(
     return ("\n".join(lines) + "\n").encode("utf-8")
 
 
+def _repair_config(config) -> None:
+    """Re-initialize a config unpickled from an older transformers release.
+
+    The checkpoint's GPT2Config was constructed by whatever transformers
+    version trained it. Newer transformers releases have moved some config
+    fields (e.g. output_attentions) to private, property-backed attributes,
+    so the unpickled instance's raw __dict__ no longer matches what the
+    installed version's code expects, causing AttributeError at inference
+    time. Round-tripping through from_dict()/__init__ under the currently
+    installed transformers re-derives those private attributes. The fix is
+    applied in place so every submodule that already holds a reference to
+    this exact config object sees the repaired state.
+    """
+
+    fresh = type(config).from_dict(dict(vars(config)))
+    config.__dict__.clear()
+    config.__dict__.update(vars(fresh))
+
+
 def load_foundation_model(
     model_dir: str | Path = DEFAULT_MODEL_DIR,
     device: torch.device | None = None,
@@ -183,6 +202,7 @@ def load_foundation_model(
     # PyTorch >=2.6's stricter default. This is the project's own bundled,
     # trusted checkpoint.
     model = torch.load(model_path, map_location=active_device, weights_only=False)
+    _repair_config(model.config)
     model.eval()
     model.to(active_device)
 
