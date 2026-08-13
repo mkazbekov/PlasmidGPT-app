@@ -1,6 +1,6 @@
 streamlit>=1.61,<2
-torch==2.0.1
-transformers==4.37.2
-pandas==2.2.0
-numpy==1.26.4
+torch>=2.0.1
+transformers>=4.37.2,<5
+pandas>=2.2.0,<3
+numpy>=1.26.4,<3
 biopython>=1.81
